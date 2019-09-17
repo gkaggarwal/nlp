@@ -17,6 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.dummy import DummyClassifier
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.linear_model import LogisticRegression
 # META DATA
 POS_FILENAME = 'data/rt-polaritydata/rt-polarity.pos'
 NEG_FILENAME = 'data/rt-polaritydata/rt-polarity.neg'
@@ -101,11 +102,15 @@ def main():
 	n_grams = CountVectorizer(ngram_range=(1, 1))
 	print(type(x))
 
-	clf = DummyClassifier()
-	clf.fit(n_grams.fit_transform(x), y)
-	print(clf.score(n_grams.fit_transform(x), y))
-	
+	clf = LogisticRegression()
+	clf1 = DummyClassifier()
+	x_train, x_test, y_train, y_test = train_test_split(n_grams.fit_transform(x), y)
 
+	clf.fit(x_train, y_train)
+	print(clf.score(x_test, y_test))
+	
+	clf1.fit(x_train, y_train)
+	print(clf1.score(x_test, y_test))
 
 if __name__ == '__main__':
 	main()
