@@ -11,15 +11,12 @@ To preprocess the following:
 """
 
 # data preprocessing imports
-import nltk
-from nltk import word_tokenize
-from nltk.util import ngrams
-from collections import Counter
+
 from sklearn.model_selection import train_test_split
 # sklearn model imports
 from sklearn.dummy import DummyClassifier
 import numpy as np
-
+from sklearn.feature_extraction.text import CountVectorizer
 # META DATA
 POS_FILENAME = 'data/rt-polaritydata/rt-polarity.pos'
 NEG_FILENAME = 'data/rt-polaritydata/rt-polarity.neg'
@@ -32,9 +29,8 @@ class Unigram:
 
 	def raw(self):
 		# Implement raw unigram counts, nothing else fancy
-		token = nltk.word_tokenize(self.text)
-		unigrams = ngrams(token, 1)
-		return unigrams
+		# default unigram config, we may change the parameters later
+		return CountVectorizer(ngram_range=(1, 1))
 
 	def lemmatize(self):
 		pass
@@ -67,8 +63,6 @@ class Method:
 		pass
 
 
-
-
 # preprocessing
 def load_to_text(file_name):
 	"""
@@ -82,32 +76,35 @@ def load_to_text(file_name):
 
 	return reviews
 
+
 def label_and_merge(data_pos, data_neg):
-	data_pos = ''.join(data_pos)
-	data_neg = ''.join(data_neg)
 
 
 	label_pos = np.ones(len(data_pos))
 	label_neg = np.zeros(len(data_neg))
+
 	data = data_pos + data_neg
 	label = np.concatenate([label_pos, label_neg])
 	return data, label
 
 
 
-
 def main():
 	negative_reviews = load_to_text(NEG_FILENAME)
 	positive_reviews = load_to_text(POS_FILENAME)
+
+	# convert to unigram counts
+
+
+
 	x, y = label_and_merge(positive_reviews, negative_reviews)
+	n_grams = CountVectorizer(ngram_range=(1, 1))
+	print(type(x))
 
-	x_train, x_test, y_train, y_test = train_test_split(x, y)
-
-
-
-	clf = DummyClassifier(strategy='most_frequent', random_state=0)
-	clf.fit(x_train, y_train)
-	print(clf.score(x_test, y_test))
+	clf = DummyClassifier()
+	clf.fit(n_grams.fit_transform(x), y)
+	print(clf.score(n_grams.fit_transform(x), y))
+	
 
 
 if __name__ == '__main__':
