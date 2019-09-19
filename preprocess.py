@@ -33,14 +33,14 @@ class Unigram:
 		pass
 
 	@classmethod
-	def raw(self, corporus):
+	def raw(self):
 		# Implement raw unigram counts, nothing else fancy
 		# default unigram config, we may change the parameters later
-		return CountVectorizer(ngram_range=(1, 1)).fit_transform(corporus)
+		return CountVectorizer(ngram_range=(1, 1))
 
 	def lemmatize(self, x):
 		pass
-		
+
 	@classmethod
 	def stem(self, corporus):
 		result = []
@@ -116,9 +116,9 @@ def main():
 	# convert to unigram counts
 	x, y = label_and_merge(positive_reviews, negative_reviews)
 
-	x_train, x_test, y_train, y_test = train_test_split((Unigram.stem(x)), y)
+	x_train, x_test, y_train, y_test = train_test_split(x, y)
 
-	pipe = Pipeline(steps=[('logistic', Method.logistic())])
+	pipe = Pipeline(steps=[('raw', Unigram.raw()), ('logistic', Method.logistic())])
 
 	pipe.fit(x_train, y_train)
 	print(pipe.score(x_test, y_test))
