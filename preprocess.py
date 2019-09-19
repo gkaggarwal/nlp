@@ -13,6 +13,9 @@ To preprocess the following:
 # data preprocessing imports
 
 from sklearn.model_selection import train_test_split
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize 
+
 # sklearn model imports
 from sklearn.dummy import DummyClassifier
 import numpy as np
@@ -25,25 +28,34 @@ NEG_FILENAME = 'data/rt-polaritydata/rt-polarity.neg'
 
 # uniram features
 class Unigram:
-	def __init__(self, data):
-		self.text = data
+	def __init__(self):
+		pass
 
+	@classmethod
 	def raw(self):
 		# Implement raw unigram counts, nothing else fancy
 		# default unigram config, we may change the parameters later
 		return CountVectorizer(ngram_range=(1, 1))
 
-	def lemmatize(self):
+	def lemmatize(self, x):
 		pass
 
-	def stem(self):
-		pass
+	@classmethod
+	def stem(self, corporus):
+		result = []
+		for x in corporus:
+			words = word_tokenize(x)
+			res = [PorterStemmer().stem(i) for i in words]
+			result.append(' '.join(res))
+		return result
 
+	@classmethod
 	def rm_stopwords(self):
-		pass
+		return CountVectorizer(ngram_range=(1, 1), stop_words='english')
 
+	@classmethod
 	def rm_infreq_words(self): 
-		pass
+		return CountVectorizer(ngram_range=(1, 1), min_df=0.01)
 
 	def smoothing(self):
 		pass
@@ -55,7 +67,7 @@ class Method:
 		pass
 
 	def logistic(self):
-		pass
+		return LogisticRegression()
 
 	def svm(self):
 		pass
@@ -63,6 +75,8 @@ class Method:
 	def naives_bayes(self):
 		pass
 
+	def dummy(self):
+		return DummyClassifier()
 
 # preprocessing
 def load_to_text(file_name):
@@ -94,23 +108,26 @@ def main():
 	negative_reviews = load_to_text(NEG_FILENAME)
 	positive_reviews = load_to_text(POS_FILENAME)
 
+	methods = [DummyClassifier(), LogisticRegression()]
+	unigrams = [CountVectorizer(ngram_range=(1, 1)),
+				CountVectorizer(ngram_range=(1, 1), stop_words='english'),
+				CountVectorizer(ngram_range=(1, 1), min_df=0.01)]
 	# convert to unigram counts
-
-
-
 	x, y = label_and_merge(positive_reviews, negative_reviews)
-	n_grams = CountVectorizer(ngram_range=(1, 1))
-	print(type(x))
+	# may or may not stem
 
-	clf = LogisticRegression()
-	clf1 = DummyClassifier()
-	x_train, x_test, y_train, y_test = train_test_split(n_grams.fit_transform(x), y)
 
-	clf.fit(x_train, y_train)
-	print(clf.score(x_test, y_test))
-	
-	clf1.fit(x_train, y_train)
-	print(clf1.score(x_test, y_test))
+	n_grams = unigrams[2]
+	stemmed = Unigram.stem(x)
+	print('before', len(x))
+	print("stemmed", len(stemmed))
+	x_train, x_test, y_train, y_test = train_test_split(n_grams.fit_transform(stemmed), y)
+
+	for clf in methods:
+		print('method name: ', clf)
+		clf.fit(x_train, y_train)
+		print('test_accuracy:', clf.score(x_test, y_test))
+
 
 if __name__ == '__main__':
 	main()
