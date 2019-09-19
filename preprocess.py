@@ -21,6 +21,7 @@ from sklearn.dummy import DummyClassifier
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 # META DATA
 POS_FILENAME = 'data/rt-polaritydata/rt-polarity.pos'
 NEG_FILENAME = 'data/rt-polaritydata/rt-polarity.neg'
@@ -32,14 +33,14 @@ class Unigram:
 		pass
 
 	@classmethod
-	def raw(self):
+	def raw(self, corporus):
 		# Implement raw unigram counts, nothing else fancy
 		# default unigram config, we may change the parameters later
-		return CountVectorizer(ngram_range=(1, 1))
+		return CountVectorizer(ngram_range=(1, 1)).fit_transform(corporus)
 
 	def lemmatize(self, x):
 		pass
-
+		
 	@classmethod
 	def stem(self, corporus):
 		result = []
@@ -47,15 +48,16 @@ class Unigram:
 			words = word_tokenize(x)
 			res = [PorterStemmer().stem(i) for i in words]
 			result.append(' '.join(res))
-		return result
+		return CountVectorizer(ngram_range=(1, 1)).fit_transform(result)
+		
 
 	@classmethod
-	def rm_stopwords(self):
-		return CountVectorizer(ngram_range=(1, 1), stop_words='english')
+	def rm_stopwords(self, corporus):
+		return CountVectorizer(ngram_range=(1, 1), stop_words='english').fit_transform(corporus)
 
 	@classmethod
-	def rm_infreq_words(self): 
-		return CountVectorizer(ngram_range=(1, 1), min_df=0.01)
+	def rm_infreq_words(self, corporus): 
+		return CountVectorizer(ngram_range=(1, 1), min_df=0.01).fit_transform(corporus)
 
 	def smoothing(self):
 		pass
@@ -66,6 +68,7 @@ class Method:
 	def __init__(self):
 		pass
 
+	@classmethod
 	def logistic(self):
 		return LogisticRegression()
 
@@ -75,6 +78,7 @@ class Method:
 	def naives_bayes(self):
 		pass
 
+	@classmethod
 	def dummy(self):
 		return DummyClassifier()
 
@@ -108,25 +112,16 @@ def main():
 	negative_reviews = load_to_text(NEG_FILENAME)
 	positive_reviews = load_to_text(POS_FILENAME)
 
-	methods = [DummyClassifier(), LogisticRegression()]
-	unigrams = [CountVectorizer(ngram_range=(1, 1)),
-				CountVectorizer(ngram_range=(1, 1), stop_words='english'),
-				CountVectorizer(ngram_range=(1, 1), min_df=0.01)]
+
 	# convert to unigram counts
 	x, y = label_and_merge(positive_reviews, negative_reviews)
-	# may or may not stem
 
+	x_train, x_test, y_train, y_test = train_test_split((Unigram.stem(x)), y)
 
-	n_grams = unigrams[2]
-	stemmed = Unigram.stem(x)
-	print('before', len(x))
-	print("stemmed", len(stemmed))
-	x_train, x_test, y_train, y_test = train_test_split(n_grams.fit_transform(stemmed), y)
+	pipe = Pipeline(steps=[('logistic', Method.logistic())])
 
-	for clf in methods:
-		print('method name: ', clf)
-		clf.fit(x_train, y_train)
-		print('test_accuracy:', clf.score(x_test, y_test))
+	pipe.fit(x_train, y_train)
+	print(pipe.score(x_test, y_test))
 
 
 if __name__ == '__main__':
