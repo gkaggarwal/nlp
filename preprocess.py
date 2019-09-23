@@ -174,7 +174,7 @@ def plot_confusion_mat(y_true, y_pred, name="cm"):
     labels = ["positive", "negative"]
 
     cm = confusion_matrix(y_pred, y_true)
-    print("confusion_matrix")
+    print("confusion_matrix", cm)
     plt.figure()
     plt.matshow(cm)
     plt.savefig(name)
@@ -191,7 +191,6 @@ def get_results(clf, x_train, x_test, y_train, y_test, clf_name='q1'):
     print("test acc:", test_acc)
     print("best estimator", clf.best_estimator_)
     print("get_params", clf.best_params_)
-
 
 def baseline(x_train, x_test, y_train, y_test):
     x_train = Preprocess.lemma(x_train)
@@ -233,7 +232,33 @@ def q1(x_train, x_test, y_train, y_test, unigram_meth=None):
         get_results(clf, x_train, x_test, y_train, y_test)
 
 
+def run_all_methods(positive_reviews, negative_reviews):
+    """a simple run of all methods without param tuning"""
+    #methods = [DummyClassifier(), LogisticRegression(), SVC(), Method.naive_bayes()]
+    methods = [Method.naive_bayes()]
+    unigrams = [CountVectorizer(ngram_range=(1, 1), stop_words='english')]
+    # unigrams = [CountVectorizer(ngram_range=(1, 1)),
+    #             CountVectorizer(ngram_range=(1, 1), stop_words='english'),
+                # CountVectorizer(ngram_range=(1, 1), min_df=0.01)]
+    # convert to unigram counts
+    x, y = label_and_merge(positive_reviews, negative_reviews)
+    # may or may not stem
 
+    for i in range(len(unigrams)):
+        n_grams = CountVectorizer(ngram_range=(1, 1), min_df=0.01)
+        # stemmed = Unigram.stem(x)
+
+        x_train, x_test, y_train, y_test = train_test_split(n_grams.fit_transform(x), y)
+
+        for clf in methods:
+            print('method name: ', clf)
+            clf.fit(x_train, y_train)
+            print('train_accuracy:', clf.score(x_train, y_train))
+
+            print('test_accuracy:', clf.score(x_test, y_test))
+            y_pred = clf.predict(x_test)
+
+            plot_confusion_mat(y_pred, y_test)
 
 
 def main():
@@ -256,7 +281,9 @@ def main():
     #         x_test = Preprocess.lemma(x_test)
 
 
-    q1(x_train, x_test, y_train, y_test)
+    #q1(x_train, x_test, y_train, y_test)
+    run_all_methods(positive_reviews, negative_reviews)
+
     # print("experiments with raw unigrams")
     # q1(x_train, x_test, y_train, y_test)
     # print("unigram without infrequent words")
