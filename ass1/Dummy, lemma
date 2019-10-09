@@ -114,3 +114,26 @@ best estimator Pipeline(memory=None,
   shrinking=True, tol=0.001, verbose=False))])
 get_params {'svm__C': 545.5594781168514}
 
+##### NAIVES bayes grid #######
+train acc: 0.9292146073036518
+test acc: 0.7809452363090773
+best estimator Pipeline(memory=None,
+     steps=[('raw', CountVectorizer(analyzer='word', binary=False, decode_error='strict',
+        dtype=<class 'numpy.int64'>, encoding='utf-8', input='content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), preprocessor=None, stop_words=None,
+        strip_accents=None, token_pattern='(?u)\\b\\w\\w+\\b',
+        tokenizer=None, vocabulary=None)), ('naive_bayes', BernoulliNB(alpha=1.0, binarize=0.0, class_prior=None, fit_prior=True))])
+get_params {'naive_bayes__alpha': 1.0}
+
+#### Logistic grid
+train acc: 0.9613556778389195
+test acc: 0.753563390847712
+best estimator Pipeline(memory=None,
+     steps=[('raw', CountVectorizer(analyzer='word', binary=False, decode_error='strict',
+        dtype=<class 'numpy.int64'>, encoding='utf-8', input='content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), preprocessor=None, stop_words=None,
+        strip_...penalty='l2', random_state=None,
+          solver='warn', tol=0.0001, verbose=0, warm_start=False))])
+get_params {'logistic__C': 0.615848211066026}

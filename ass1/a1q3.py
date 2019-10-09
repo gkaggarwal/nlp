@@ -234,32 +234,38 @@ def q1(x_train, x_test, y_train, y_test, unigram_meth=None):
 
 def run_all_methods(positive_reviews, negative_reviews):
     """a simple run of all methods without param tuning"""
-    print("Run different unigram methods, lemmatizer, stemmer, please wait...")
+    print("After choosing parameters, running \
+     different unigram methods, lemmatizer, stemmer, please wait...")
     methods = [DummyClassifier(), LogisticRegression(), SVC(), Method.naive_bayes()]
-    unigrams = [CountVectorizer(ngram_range=(1, 1)),
-                CountVectorizer(ngram_range=(1, 1), stop_words='english'),
-                CountVectorizer(ngram_range=(1, 1), min_df=0.01)]
+    unigrams = [CountVectorizer(ngram_range=(1, 1), stop_words='english'),
+                CountVectorizer(ngram_range=(1, 1), min_df=0.01),
+                CountVectorizer(ngram_range=(1, 1), min_df=0.1),
+                CountVectorizer(ngram_range=(1, 1), min_df=0.001),
+                CountVectorizer(ngram_range=(1, 1))]
     # convert to unigram counts
     x, y = label_and_merge(positive_reviews, negative_reviews)
     # may or may not stem
-    preproc = [Preprocess.stem(x), Preprocess.lemma(), 'na']
+    preproc = ["stem", "lemma", 'na']
     for i in range(len(unigrams)):
         n_grams = unigrams[i]
         for j in range(len(preproc)):
-            if preproc[j] != 'na':
-                x = preproc[j]
+            if preproc[j] == 'stem':
+                x = Preprocess.stem(x)
+            elif preproc[j] == 'lemma':
+                x = Preprocess.lemma(x)
+            print("Apply preproc {}".format(preproc[j]))
 
-        x_train, x_test, y_train, y_test = train_test_split(n_grams.fit_transform(x), y)
+            x_train, x_test, y_train, y_test = train_test_split(n_grams.fit_transform(x), y)
 
-        for clf in methods:
-            print("unigram method: ", n_grams)
-            print('method name: ', clf)
-            clf.fit(x_train, y_train)
-            print('train_accuracy:', clf.score(x_train, y_train))
-            print('test_accuracy:', clf.score(x_test, y_test))
-            y_pred = clf.predict(x_test)
+            for clf in methods:
+                print("unigram method: ", n_grams)
+                print('method name: ', clf)
+                clf.fit(x_train, y_train)
+                print('train_accuracy:', clf.score(x_train, y_train))
+                print('test_accuracy:', clf.score(x_test, y_test))
+                y_pred = clf.predict(x_test)
 
-            plot_confusion_mat(y_pred, y_test)
+                plot_confusion_mat(y_pred, y_test)
 
 
 def main():
