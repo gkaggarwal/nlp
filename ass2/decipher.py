@@ -2,6 +2,8 @@ import argparse
 from nltk.tag import hmm
 import os
 import nltk
+from nltk.probability import LidstoneProbDist
+
 nltk.download('brown')
 nltk.download('universal_tagset')  
 
@@ -62,6 +64,23 @@ def hmm_base():
 	# accruacy
 	print(res)
 
+def hmm_laplace():
+	train_corpus = load_files()
+	test_corpus = load_files(mode='test')
+
+	def est(fd, bins):
+		return LidstoneProbDist(fd, 1, bins)	
+
+	trainer = hmm.HiddenMarkovModelTrainer()
+	tagger = trainer.train_supervised(train_corpus, estimator=est)
+	tagger.train(train_corpus)
+	# print(test_corpus[0])
+	res = tagger.evaluate(test_corpus)
+
+	# accruacy
+	print(res)
+
+
 
 def extra_trainsition():
 	x = ['This is the', 'This .']
@@ -81,8 +100,8 @@ def main():
 
 	if args.lm is False and args.hmm is False:
 		# hmm_base()
-		extra_trainsition()
-
+		# extra_trainsition()
+		hmm_laplace()
 
 
 if __name__ == '__main__':
