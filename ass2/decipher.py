@@ -7,6 +7,7 @@ nltk.download('universal_tagset')
 
 from nltk.corpus import brown
 from nltk import sent_tokenize, word_tokenize
+from sklearn.feature_extraction.text import CountVectorizer
 
 
 
@@ -23,14 +24,10 @@ def split_list_char(src):
 		dest.append(temp)
 	return dest
 
-def load_files(p='a2data/cipher1/', mode='train'):
+def load_files(p='a2data/cipher3/', mode='train'):
 	tagged_sentences = brown.tagged_sents(categories="news", tagset="universal")
 
-	# let's keep 20% of the data for testing, and 80 for training
-	i = int(len(tagged_sentences)*0.2)
-	train_sentences = tagged_sentences[i:]
-	test_sentences = tagged_sentences[:i]
-	print(test_sentences[0])
+	
 
 	with open((p+mode+'_plain.txt'), 'r') as f:
 		label = f.readlines()
@@ -50,7 +47,6 @@ def load_files(p='a2data/cipher1/', mode='train'):
 			#temp.append((data_char[i], label_char[i]))
 			temp.append((data_char[i][j], label_char[i][j]))
 		corprus.append(temp)
-	print(corprus[0])
 	return corprus
 
 
@@ -60,13 +56,19 @@ def hmm_base():
 	test_corpus = load_files(mode='test')
 	trainer = hmm.HiddenMarkovModelTrainer()
 	tagger = trainer.train_supervised(train_corpus)
-
+	print(test_corpus[0])
 	res = tagger.evaluate(test_corpus)
 
 	# accruacy
 	print(res)
 
 
+def extra_trainsition():
+	x = ['This is the', 'This .']
+	bigram = CountVectorizer(ngram_range=(2, 2), analyzer='char')
+	y = bigram.fit_transform(x)
+	print(y.toarray())
+	print(bigram.get_feature_names())
 
 
 
@@ -78,7 +80,8 @@ def main():
 	args = parser.parse_args()
 
 	if args.lm is False and args.hmm is False:
-		hmm_base()
+		# hmm_base()
+		extra_trainsition()
 
 
 
