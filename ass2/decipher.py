@@ -10,6 +10,8 @@ nltk.download('universal_tagset')
 from nltk.corpus import brown
 from nltk import sent_tokenize, word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
+import re 
+
 
 def split_list_char(src):
 	dest = []
@@ -24,7 +26,6 @@ def split_list_char(src):
 
 
 def load_files(p='a2data/cipher3/', mode='train'):
-	tagged_sentences = brown.tagged_sents(categories="news", tagset="universal")
 
 	with open((p+mode+'_plain.txt'), 'r') as f:
 		label = f.readlines()
@@ -53,7 +54,6 @@ def hmm_base():
 	test_corpus = load_files(mode='test')
 	trainer = hmm.HiddenMarkovModelTrainer()
 	tagger = trainer.train_supervised(train_corpus)
-	print(test_corpus[0])
 	res = tagger.evaluate(test_corpus)
 
 	# accruacy
@@ -69,7 +69,6 @@ def hmm_laplace():
 
 	trainer = hmm.HiddenMarkovModelTrainer()
 	tagger = trainer.train_supervised(train_corpus, estimator=est)
-	tagger.train(train_corpus)
 	# print(test_corpus[0])
 	res = tagger.evaluate(test_corpus)
 
@@ -130,24 +129,37 @@ def train_supervised_modified(labelled_sequences, extra_transition, estimator=No
 def extra_text_import():
 	news_text = brown.words(categories='news')
 	words = news_text
-	table = str.maketrans('', '', string.punctuation)
-	
+	remove = string.punctuation + string.digits
+	remove = remove.replace(",", "")
+	remove = remove.replace(".", "")
+	# print("patterns to remove", remove)
+	table = str.maketrans('', '', remove)
+
 	words = [word.lower() for word in words]
-	print(words[:20])
-	stripped = [w.translate(table) for w in words]
-	print(stripped[0:20])
+	# print(words[:50])	
+
+	words = [w.translate(table) for w in words]
+	# print(stripped[0:50])
+	return words
+
+
 
 
 def extra_transition():
 	"""Taken from  http://www.nltk.org/api/nltk.tag.html#nltk.tag.hmm.HiddenMarkovModelTrainer.train_supervised"""
-	labelled_sequences = brown.words(categories='news')
+	
+
+	x = extra_text_import()
+	sentences = x
 	transitions = ConditionalFreqDist()
-	for sequence in labelled_sequences:
+	for word in sentences:
 		lasts = None
-		for token in sequence:
-			state = token[1]
-			if lasts is not None:
-				transitions[lasts][state] += 1
+		for token in word:
+			if lasts is None:
+				pass
+			else:
+				transitions[lasts][token] += 1
+			lasts = token
 	return transitions
 	
 
@@ -156,22 +168,25 @@ def hmm_extra():
 	test_corpus = load_files(mode='test')
 	extra_count = extra_transition()
 	tagger = train_supervised_modified(train_corpus, extra_count)
-	print(test_corpus[0])
+	tagger.train(train_corpus)
 	res = tagger.evaluate(test_corpus)
 	print(res)
+
+
 
 
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-lm', action='store_true')
-	parser.add_argument('-hmm', action='store_true')
+	parser.add_argument('-laplace', action='store_true')
 	args = parser.parse_args()
 
-	if args.lm is False and args.hmm is False:
-		# hmm_base()
-		# extra_trainsition()
-		# hmm_extra()
-		extra_text_import()
+	if args.lm is False and args.laplace is False:
+		hmm_base()
+	elif args.lm is False and args.laplace is True:
+		hmm_laplace()
+	elif args.lm is True and args.laplace is False:
+		hmm_extra()
 
 
 if __name__ == '__main__':
