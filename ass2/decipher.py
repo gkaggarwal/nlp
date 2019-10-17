@@ -18,6 +18,7 @@ from nltk.corpus import brown
 from nltk import sent_tokenize, word_tokenize
 from sklearn.feature_extraction.text import CountVectorizer
 import re
+from nltk.tokenize.treebank import TreebankWordDetokenizer
 
 
 def split_list_char(src):
@@ -66,9 +67,9 @@ def hmm_base():
     print(res)
 
 
-def hmm_laplace():
-    train_corpus = load_files()
-    test_corpus = load_files(mode="test")
+def hmm_laplace(path):
+    train_corpus = load_files(p=path)
+    test_corpus = load_files(p=path, mode="test")
 
     def est(fd, bins):
         return LidstoneProbDist(fd, 1, bins)
@@ -133,20 +134,23 @@ def train_supervised_modified(labelled_sequences, extra_transition, estimator=No
 
 
 def extra_text_import():
-    news_text = brown.words(categories="news")
-    words = news_text
+
+    news_text = brown.sents(categories="news")
+    words = []
+    for sent in news_text:
+        temp = sent
+        words.append(TreebankWordDetokenizer().detokenize(temp))
+
     remove = string.punctuation + string.digits
     remove = remove.replace(",", "")
     remove = remove.replace(".", "")
     # print("patterns to remove", remove)
     table = str.maketrans("", "", remove)
 
-    words = [word.lower() for word in words]
-    # print(words[:50])
-
+    words = [w.lower() for w in words]
     words = [w.translate(table) for w in words]
-    # print(stripped[0:50])
-    return words
+
+    return words[0:500] #[0:1]
 
 
 def extra_transition():
@@ -157,39 +161,60 @@ def extra_transition():
     x = extra_text_import()
     sentences = x
     transitions = ConditionalFreqDist()
-    for word in sentences:
+    for sent in sentences:
         lasts = None
-        for token in word:
+        for token in sent:
+            #print(token)
             if lasts is None:
                 pass
             else:
                 transitions[lasts][token] += 1
             lasts = token
+
     return transitions
 
 
-def hmm_extra():
-    train_corpus = load_files()
-    test_corpus = load_files(mode="test")
+def hmm_extra(path):
+    train_corpus = load_files(p=path)
+    test_corpus = load_files(p=path, mode="test")
     extra_count = extra_transition()
     tagger = train_supervised_modified(train_corpus, extra_count)
-    tagger.train(train_corpus)
+    # tagger.train(train_corpus)
     res = tagger.evaluate(test_corpus)
     print(res)
+
+
+def hmm_extra_laplace(path):
+    train_corpus = load_files(p=path)
+    test_corpus = load_files(p=path, mode="test")
+    extra_count = extra_transition()
+
+    def est(fd, bins):
+        if bins < fd.B():
+            bins = fd.B()
+        return LidstoneProbDist(fd, 1, bins)
+
+    tagger = train_supervised_modified(train_corpus, extra_count, estimator=est)
+    res = tagger.evaluate(test_corpus)
+    print(res) 
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-lm", action="store_true")
     parser.add_argument("-laplace", action="store_true")
+    parser.add_argument('path')
     args = parser.parse_args()
+    print(args.path)
 
     if args.lm is False and args.laplace is False:
         hmm_base()
     elif args.lm is False and args.laplace is True:
-        hmm_laplace()
+        hmm_laplace(args.path)
     elif args.lm is True and args.laplace is False:
-        hmm_extra()
+        hmm_extra(args.path)
+    elif args.lm is True and args.laplace is True:
+        hmm_extra_laplace(args.path)
 
 
 if __name__ == "__main__":
