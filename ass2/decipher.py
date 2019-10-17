@@ -32,7 +32,7 @@ def split_list_char(src):
     return dest
 
 
-def load_files(p="a2data/cipher3/", mode="train"):
+def load_files(p="a2data/cipher1/", mode="train"):
 
     with open((p + mode + "_plain.txt"), "r") as f:
         label = f.readlines()
