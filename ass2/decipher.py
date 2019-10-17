@@ -8,6 +8,7 @@ from nltk.probability import (
     FreqDist,
     ConditionalFreqDist,
     ConditionalProbDist,
+    LaplaceProbDist
 )
 import string
 
@@ -35,10 +36,10 @@ def split_list_char(src):
 
 def load_files(p="a2data/cipher1/", mode="train"):
 
-    with open((p + mode + "_plain.txt"), "r") as f:
+    with open(os.path.join(p, mode + "_plain.txt"), "r") as f:
         label = f.readlines()
 
-    with open((p + mode + "_cipher.txt"), "r") as f:
+    with open(os.path.join(p, mode + "_cipher.txt"), "r") as f:
         data = f.readlines()
 
     label_char = split_list_char(label)
@@ -56,9 +57,9 @@ def load_files(p="a2data/cipher1/", mode="train"):
     return corprus
 
 
-def hmm_base():
-    train_corpus = load_files()
-    test_corpus = load_files(mode="test")
+def hmm_base(path):
+    train_corpus = load_files(p=path)
+    test_corpus = load_files(p=path, mode="test")
     trainer = hmm.HiddenMarkovModelTrainer()
     tagger = trainer.train_supervised(train_corpus)
     res = tagger.evaluate(test_corpus)
@@ -90,15 +91,13 @@ def train_supervised_modified(labelled_sequences, extra_transition, estimator=No
     """
 
     # default to the MLE estimate
-    _symbols = []
-    _states = []
     if estimator is None:
         estimator = lambda fdist, bins: MLEProbDist(fdist)
 
     # count occurrences of starting states, transitions out of each state
     # and output symbols observed in each state
-    known_symbols = set(_symbols)
-    known_states = set(_states)
+    known_symbols = []
+    known_states = []
 
     starting = FreqDist()
     transitions = ConditionalFreqDist()
@@ -117,20 +116,38 @@ def train_supervised_modified(labelled_sequences, extra_transition, estimator=No
 
             # update the state and symbol lists
             if state not in known_states:
-                _states.append(state)
-                known_states.add(state)
+                known_states.append(state)
 
             if symbol not in known_symbols:
-                _symbols.append(symbol)
-                known_symbols.add(symbol)
+                known_symbols.append(symbol)
+
+    labelled_sequences = extra_text_import()
+    for sequence in labelled_sequences:
+        lasts = None
+        for token in sequence:
+            state = token
+            if lasts is None:
+                starting[state] += 1
+            else:
+                transitions[lasts][state] += 1
+            lasts = state
+
+            # update the state and symbol lists
+            if state not in known_states:
+                known_states.append(state)
+
+
 
     # create probability distributions (with smoothing)
-    N = len(_states)
+    N = len(known_states)
+    print("known_states", known_states)
+    print("len known")
+    print(N)
     pi = estimator(starting, N)
-    A = ConditionalProbDist(transitions.__add__(extra_transition), estimator, N)
-    B = ConditionalProbDist(outputs, estimator, len(_symbols))
+    A = ConditionalProbDist(transitions, estimator, N)
+    B = ConditionalProbDist(outputs, estimator, len(known_symbols))
 
-    return hmm.HiddenMarkovModelTagger(_symbols, _states, A, B, pi)
+    return hmm.HiddenMarkovModelTagger(known_states, known_symbols, A, B, pi)
 
 
 def extra_text_import():
@@ -158,8 +175,7 @@ def extra_transition():
     http://www.nltk.org/api/nltk.tag.html#nltk.
     tag.hmm.HiddenMarkovModelTrainer.train_supervised"""
 
-    x = extra_text_import()
-    sentences = x
+    sentences = extra_text_import()
     transitions = ConditionalFreqDist()
     for sent in sentences:
         lasts = None
@@ -190,11 +206,11 @@ def hmm_extra_laplace(path):
     extra_count = extra_transition()
 
     def est(fd, bins):
-        if bins < fd.B():
-            bins = fd.B()
+        # if bins < fd.B():
+        #     bins = fd.B()
         return LidstoneProbDist(fd, 1, bins)
 
-    tagger = train_supervised_modified(train_corpus, extra_count, estimator=est)
+    tagger = train_supervised_modified(train_corpus, extra_count, estimator=LaplaceProbDist)
     res = tagger.evaluate(test_corpus)
     print(res) 
 
@@ -205,16 +221,31 @@ def main():
     parser.add_argument("-laplace", action="store_true")
     parser.add_argument('path')
     args = parser.parse_args()
-    print(args.path)
-
+    
     if args.lm is False and args.laplace is False:
-        hmm_base()
+        for i in range(3):
+            real_num = i + 1
+            fp = args.path + '/cipher' + str(real_num)
+            print("Running {} on cipher {}".format("hmm_base", real_num))
+            hmm_base(fp)
     elif args.lm is False and args.laplace is True:
-        hmm_laplace(args.path)
+        for i in range(3):
+            real_num = i + 1
+            fp = args.path + '/cipher' + str(real_num)
+            print("Running {} on cipher {}".format("hmm_laplace", real_num))
+            hmm_laplace(fp)
     elif args.lm is True and args.laplace is False:
-        hmm_extra(args.path)
+        for i in range(3):
+            real_num = i + 1
+            fp = args.path + '/cipher' + str(real_num)
+            print("Running {} on cipher {}".format("hmm_lm", real_num))
+            hmm_extra(fp)
     elif args.lm is True and args.laplace is True:
-        hmm_extra_laplace(args.path)
+        for i in range(3):
+            real_num = i + 1
+            fp = args.path + '/cipher' + str(real_num)
+            print("Running {} on cipher {}".format("hmm_lm_laplace", real_num))
+            hmm_extra_laplace(fp)
 
 
 if __name__ == "__main__":
