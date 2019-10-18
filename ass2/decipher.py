@@ -121,8 +121,8 @@ def train_supervised_modified(labelled_sequences, extra_transition, estimator=No
             if symbol not in known_symbols:
                 known_symbols.append(symbol)
 
-    labelled_sequences = extra_text_import()
-    for sequence in labelled_sequences:
+    extra_sequences = extra_text_import()
+    for sequence in extra_sequences:
         lasts = None
         for token in sequence:
             state = token
@@ -140,9 +140,9 @@ def train_supervised_modified(labelled_sequences, extra_transition, estimator=No
 
     # create probability distributions (with smoothing)
     N = len(known_states)
-    print("known_states", known_states)
-    print("len known")
-    print(N)
+    # print("known_states", known_states)
+    # print("len known")
+    # print(N)
     pi = estimator(starting, N)
     A = ConditionalProbDist(transitions, estimator, N)
     B = ConditionalProbDist(outputs, estimator, len(known_symbols))
@@ -167,7 +167,7 @@ def extra_text_import():
     words = [w.lower() for w in words]
     words = [w.translate(table) for w in words]
 
-    return words[0:500] #[0:1]
+    return words #[0:1]
 
 
 def extra_transition():
@@ -198,6 +198,9 @@ def hmm_extra(path):
     # tagger.train(train_corpus)
     res = tagger.evaluate(test_corpus)
     print(res)
+    res = tagger.evaluate(train_corpus)
+    print('train {}'.format(res))
+
 
 
 def hmm_extra_laplace(path):
@@ -210,7 +213,7 @@ def hmm_extra_laplace(path):
         #     bins = fd.B()
         return LidstoneProbDist(fd, 1, bins)
 
-    tagger = train_supervised_modified(train_corpus, extra_count, estimator=LaplaceProbDist)
+    tagger = train_supervised_modified(train_corpus, extra_count, estimator=est)
     res = tagger.evaluate(test_corpus)
     print(res) 
 

@@ -1,10 +1,15 @@
-S -> VP NP
-S -> VP(obj, post verb)
+# N.B. note to TA:
+# the brackets following each nonterminal represent subcategorization
+# under that nonterminal
+
+S -> VP NP # svo simple sentence
+S -> VP # sentences with direct object
+S -> NP 
 
 
 # subjects ex 1 - 7, except 2
 # ALL Pronouns
-VP -> PR(1st, sg) V(1st, sg)# je
+VP -> PR(1st, sg) V(1st, sg) # je regarde
 VP -> PR(2nd, sg) V(2nd, sg) # tu
 VP -> PR(3rd, sg) V(3rd, sg) # il/elle
 VP -> PR(1st, pl) V(1st, pl) # nous 
@@ -12,7 +17,7 @@ VP -> PR(2nd, pl) V(2nd, pl) # vous
 VP -> PR(3rd, pl)  V(3rd, pl) # ils/elles
 VP -> PR(ON) V(3rd, sg) # on
 
-NP -> NP(masc, sg) 
+NP -> NP(masc, sg) # model determiners and nouns
 NP -> NP(fem, sg)
 NP -> NP(masc, pl)
 NP -> NP(fem, pl)
@@ -27,12 +32,12 @@ V(3rd, pl) -> veulent | font | regardent
 
 VP -> NP(masc, sg) V(3rd, sg) # le chat mange
 VP -> NP(fem, sg) V(3rd, sg) 
-VP -> NP(masc, pl) V(3rd, pl)
+VP -> NP(masc, pl) V(3rd, pl) 
 VP -> NP(fem, pl) V(3rd, pl)
 
 NP(masc, sg) -> DT(masc, sg) N(masc, sg) # le chat
 NP(fem, sg) -> DT(fem, sg) N(fem, sg)
-NP(masc, pl) -> DT(pl) N(masc, pl)
+NP(masc, pl) -> DT(pl) N(masc, pl) # les chats
 NP(fem, pl) -> DT(pl) N(fem, pl)
 
 
@@ -51,7 +56,7 @@ PR(ON) -> on
 # Direct object
 VP -> PR(1st, sg) PR(dir obj) V(1st, sg) # je
 VP -> PR(2nd, sg) PR(dir obj) V(2nd, sg) # tu
-VP -> PR(3rd, sg) PR(dir obj) V(3rd, sg) # il/elles
+VP -> PR(3rd, sg) PR(dir obj) V(3rd, sg) # il/elle
 VP -> PR(1st, pl) PR(dir obj) V(1st, pl) # nous 
 VP -> PR(2nd, pl) PR(dir obj) V(2nd, pl) # vous
 VP -> PR(3rd, pl) PR(dir obj) V(3rd, pl) # ils/elles
@@ -66,11 +71,13 @@ NP -> DT(fem, sg) A(fem, sg, pre) N(fem, sg)
 NP -> DT(masc, pl) A(masc, pl, pre) N(masc, pl)
 NP -> DT(masc, pl) A(masc, sg, pre) N(fem, sg)
 
+# adj after noun
 NP(masc, sg) -> DT(masc, sg) N(masc, sg) A(masc, sg, post)
 NP(fem, sg) -> DT(fem, sg) N(fem, sg) A(fem, sg, post)
 NP(masc, pl) -> DT(pl) N(masc, pl) A(masc, pl, post)
 NP(fem, pl) -> DT(pl) N(fem, pl) A(fem, pl, post)
 
+# adjectives
 A(masc, sg, pre) -> bon | beau | joli | dernier
 A(fem, sg, pre) -> bonne | belle | jolie | dernière
 
@@ -82,3 +89,9 @@ A(fem, pl, pre) -> bonne | belles | jolies | dernières
 
 A(masc, pl, post) -> noirs | heureux | blancs | derniers
 A(fem, pl, post) -> noires | heureuses | blanches | dernières
+
+# nouns
+N(masc, sg) -> chat | poisson
+N(fem, sg) -> télévision | semaine
+N(masc, pl) -> chats | poissons
+N(fem, pl) -> télévisions | semaines
