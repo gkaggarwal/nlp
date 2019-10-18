@@ -1,3 +1,7 @@
+# Note to TA:
+# extra corpus is downloaded via NLTK
+# therefore, no extra file is in the submission folder
+# please run with `a2data` as the `<cipher_folder>` param 
 import argparse
 from nltk.tag import hmm
 import os
@@ -65,7 +69,7 @@ def hmm_base(path):
     res = tagger.evaluate(test_corpus)
 
     # accruacy
-    print(res)
+    print("test accruacy {}".format(res))
 
 
 def hmm_laplace(path):
@@ -81,7 +85,7 @@ def hmm_laplace(path):
     res = tagger.evaluate(test_corpus)
 
     # accruacy
-    print(res)
+    print("test accruacy {}".format(res))
 
 
 def train_supervised_modified(labelled_sequences, extra_transition, estimator=None):
@@ -197,7 +201,7 @@ def hmm_extra(path):
     tagger = train_supervised_modified(train_corpus, extra_count)
     # tagger.train(train_corpus)
     res = tagger.evaluate(test_corpus)
-    print(res)
+    print("test accruacy {}".format(res))
     res = tagger.evaluate(train_corpus)
     print('train {}'.format(res))
 
@@ -215,7 +219,7 @@ def hmm_extra_laplace(path):
 
     tagger = train_supervised_modified(train_corpus, extra_count, estimator=est)
     res = tagger.evaluate(test_corpus)
-    print(res) 
+    print("test accruacy {}".format(res))
 
 
 def main():
