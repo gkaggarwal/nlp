@@ -17,10 +17,6 @@ VP -> PR(2nd, pl) V(2nd, pl) # vous
 VP -> PR(3rd, pl)  V(3rd, pl) # ils/elles
 VP -> PR(ON) V(3rd, sg) # on
 
-NP -> NP(masc, sg) # model determiners and nouns
-NP -> NP(fem, sg)
-NP -> NP(masc, pl)
-NP -> NP(fem, pl)
 
 V(1st, sg) -> veux | fais | regarde
 V(2nd, sg) -> veux | fais | regardes
@@ -29,16 +25,16 @@ V(1st, pl) -> voulons | faisons | regardons
 V(2nd, pl) -> voulez | faites | regardez
 V(3rd, pl) -> veulent | font | regardent
 
+NP -> NP(sg) # determiners and nouns
+NP -> NP(pl)
 
-VP -> NP(masc, sg) V(3rd, sg) # le chat mange
-VP -> NP(fem, sg) V(3rd, sg) 
-VP -> NP(masc, pl) V(3rd, pl) 
-VP -> NP(fem, pl) V(3rd, pl)
+VP -> NP(sg) V(3rd, sg) # le chat mange
+VP -> NP(pl) V(3rd, pl) 
 
-NP(masc, sg) -> DT(masc, sg) N(masc, sg) # le chat
-NP(fem, sg) -> DT(fem, sg) N(fem, sg)
-NP(masc, pl) -> DT(pl) N(masc, pl) # les chats
-NP(fem, pl) -> DT(pl) N(fem, pl)
+NP(sg) -> DT(masc, sg) N(masc, sg) # le chat
+NP(sg) -> DT(fem, sg) N(fem, sg)
+NP(pl) -> DT(pl) N(masc, pl) # les chats
+NP(pl) -> DT(pl) N(fem, pl)
 
 
 NP -> PN

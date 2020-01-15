@@ -202,9 +202,6 @@ def hmm_extra(path):
     # tagger.train(train_corpus)
     res = tagger.evaluate(test_corpus)
     print("test accruacy {}".format(res))
-    res = tagger.evaluate(train_corpus)
-    print('train {}'.format(res))
-
 
 
 def hmm_extra_laplace(path):
