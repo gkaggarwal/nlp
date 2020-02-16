@@ -1,5 +1,5 @@
 # NLP school project
-**Link to final project [here](https://github.com/mattesko/COMP550-Project)**
+**Link to final project fake news detection [here](https://github.com/mattesko/COMP550-Project)**
 
 
 Mostly code written in NLP related python libraries
